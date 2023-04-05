@@ -1,0 +1,10 @@
+<RCC>
+  <qresource prefix="redc">
+    <file>lib/ui_2.jpg</file>
+  </qresource>
+  <qresource prefix="newPrefix">
+    <file>lib/bg_new_1.png</file>
+    <file>lib/dragon1.gif</file>
+    <file>lib/bg_2.jpg</file>
+  </qresource>
+</RCC>
