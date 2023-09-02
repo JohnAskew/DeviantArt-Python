@@ -2,7 +2,7 @@ import os, sys
 try:
 	from random import randint
 except:
-	os.syste('pip install random')
+	os.system('pip install random')
 	from random import randint
 try:
 	import turtle as tt
