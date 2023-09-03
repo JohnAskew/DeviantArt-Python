@@ -43,7 +43,7 @@ RE_END   = (set_name[-1] - set_name[0]) //100
 IM_START = -(np.mean(set_name)//150)
 IM_END   = .75 
 ######################################
-# Fun ways to modify the code for new results
+# DEMO ways to modify the code for new results
 ######################################
 #-------------------------------------
 # IM_END, below are changes you can activate for differ results.
@@ -79,7 +79,7 @@ for x in range(0, WIDTH):
 			saturation = 255
 		value = (random.choice(set_name) * 100)
 	######################################
-        # Fun ways to modify the code for new results
+        # DEMO ways to modify the code for new results
         ######################################
 		#--------------------------------------
 		# Another variable to modify to get REALLY different results
