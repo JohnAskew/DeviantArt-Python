@@ -40,19 +40,19 @@ HEIGHT = 480 #960 #1920
 
 RE_START = -(random.choice(set_name))//26
 RE_END   = (set_name[-1] - set_name[0]) //100
-IM_START = -(np.mean(set_name)//150)
 IM_END   = .75 
+IM_START = -(np.mean(set_name)//150)
 ######################################
 # DEMO ways to modify the code for new results
 ######################################
 #-------------------------------------
-# IM_END, below are changes you can activate for differ results.
-#   1. To comment out the previous line "IM_END = .75", 
+# IM_START, below are changes you can activate for differ results.
+#   1. To comment out the previous line "IM_START = -(np.mean(set_name)//150)", 
 #      simply put a hash mark (#) at the beginning of the line.
 
-#   2. To active one of the other "IM_END = " lines,
+#   2. To active one of the other "IM_START = " lines,
 #      simply remove the leading hash mark at the beginning of the line.
-
+#
 #IM_START = -(np.mean(set_name)//300)
 #IM_START = -(np.mean(set_name)//100)
 #IM_START = (set_name[0]/100) 
@@ -60,10 +60,6 @@ IM_END   = .75
 #--------------------------------------
 
 palette = []
-
-
-
-
 #(black and white) im = Image.new('RGB', (WIDTH, HEIGHT), (0, 0, 0))
 im = Image.new('HSV', (WIDTH, HEIGHT), (0, 0, 0))
 draw = ImageDraw.Draw(im)
@@ -88,8 +84,9 @@ for x in range(0, WIDTH):
 		# and remove the leading has mark from
 		# the following line:
 		# --> value = (random.choice(set_name) * 10)
+		#
+		# value = (random.choice(set_name) * 10)
 		#---------------------------------------
-		## value = (random.choice(set_name) * 10)
 
 		if value > 250:
 			value = 255
