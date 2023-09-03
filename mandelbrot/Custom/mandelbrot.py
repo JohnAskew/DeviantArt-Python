@@ -15,7 +15,8 @@ def mandelbrot(c):
 	z = 0
 	n = 1
 	#while abs(z) <=2 and n < MAX_ITER:
-	while abs(z) <=5 and n < MAX_ITER:
+	#while abs(z) <=5 and n < MAX_ITER:
+	while abs(z) <=3 and n < MAX_ITER:
 		#z = z **2 + c
 		z = pow(z,3) + c
 		n += 1
