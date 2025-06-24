@@ -21,11 +21,27 @@
 #####################################
 ## TO DO
 #####################################
+#***
+#*** New 20250618
+#***
+# Face angle/rotation: Draw Line, angle from nose to each shoulder.
+#   if both equal - facing dead on.
+#   if right side to nose shorter than left, they are looking right.
+#   if only 1 shoulder present, then its a profile
+#
+# Extend Pelvis down past pubic to widest point on outer thigh. 
+#
+#-----------------------------
+# Continuing from older notes..
+#-------------------------------
 # 0. Center lines for gesture and spinal cord
 #   a. Very Center of BODY: center_point[0], center_point[1]), 5, red, 8) #Askew20250318_center
 #   b. Very center of TORSO: (int(center_torso[0]), int(center_torso[1])), 5, dark_green, 6) #Askew20250318_center
 #   c. Center of Breast: 
-#
+
+
+
+
 # 1. Add class Point doc string
 # 2. All functions: add return type: def func() -> int:
 # 3. All functions with Params: add param return type: def func(numbers: list[int]) -> list[int]
@@ -56,6 +72,27 @@ import platform
 
 if sys.platform.startswith('win'):
         print(f'This script is running on a {platform.system()} Platform, with: {os.system("python -V")}')
+
+os.system('wget -O face_landmarker_v2_with_blendshapes.task -q https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task')
+
+try:
+    
+    import copy
+
+except:
+
+    os.system('pip install copy')
+    import copy
+
+try:
+
+    from functools import wraps
+
+except:
+
+    os.system('pip install functools')
+
+    from functools import wraps
 
 try:
     
@@ -114,12 +151,16 @@ except:
 try:
 
     import mediapipe as mp
+    from mediapipe import solutions
+    from mediapipe.framework.formats import landmark_pb2
 
 except:
 
     os.system('pip install mediapipe')
 
-    import mediapipe as mp 
+    import mediapipe as mp
+    from mediapipe import solutions
+    from mediapipe.framework.formats import landmark_pb2
     
 try:
 
@@ -182,7 +223,7 @@ except:
     import numpy as np
 #==============================
 #==============================
-DEBUG: bool = True # Suppress or print extra debug print statements
+DEBUG: bool = False #True # Suppress or print extra debug print statements
 #==============================
 #==============================
 ###############################
@@ -234,6 +275,16 @@ def bring_in_image() -> str:
                                        )
     if DEBUG: print(f'You selected {my_image} to process. It"s type is {type(my_image)}')
     return my_image
+
+#---------------------------------------
+def print_debug(passing: str) -> None:
+#---------------------------------------
+    if len(passing) == 0:
+        pass
+    else:
+        print(f'*'* 80)
+        print(f'* --> {passing}')
+        print(f'*'* 80)
 
 ###############################
 # FUNCTIONS: Ways to calculate Rotation
@@ -546,26 +597,26 @@ def visualize_right_side(image
     , center_line_offset_x
     , center_line_offset_y
     , center_line_green
-    , center_line_color):
+    , pink_line_color):
     if DEBUG:
         print("RIGHT_HIP higher --> Right side bears weight")
-    cv2.line(image, (c_shldr_x, c_shldr_y),(c_breast_x, c_breast_y ),  center_line_green, 3) #Askew20250318_center
-    cv2.line(image, (c_breast_x ,c_breast_y), (center_torso[0], center_torso[1]), center_line_green, 3) #Askew20250318_center
-    cv2.line(image, (center_torso[0], center_torso[1]),(c_navel_x, c_navel_y), center_line_green, 3) #Askew20250318_center
-    cv2.line(image, (c_navel_x, c_navel_y), (c_hip_x, c_hip_y), center_line_green, 3) #Askew20250318_center
-    
-    cv2.line(image, (c_hip_x , c_hip_y), (r_hip_x, r_hip_y),  center_line_green, 5) #Askew20230822
-    cv2.line(image, (r_hip_x , r_hip_y), (r_knee_x, r_knee_y),  center_line_green, 5) #Askew20230822
-    cv2.line(image, (r_knee_x , r_knee_y), (r_ankle_x, r_ankle_y),  center_line_green, 5) #dark_blue, 2)
-    if r_foot_index2center > l_foot_index2center: #c_heel_x:
-        cv2.line(image, ((head_center_x -center_line_offset_x), (head_center_y - center_line_offset_y)), (r_foot_x, r_foot_y), purple, 1) #Askew20250319
-        cv2.line(image, ((c_shldr_x), (c_shldr_y)), (r_foot_x, r_foot_y), center_line_color, 2) #Askew20250310
-    elif l_foot_index2center > r_foot_index2center: #c_heel_x:
-        cv2.line(image, ((head_center_x -center_line_offset_x), (head_center_y - center_line_offset_y)), (l_foot_x, l_foot_y), purple, 1) #Askew20250319
-        cv2.line(image, ((c_shldr_x), (c_shldr_y)), (l_foot_x, l_foot_y), center_line_color, 2) #Askew20250310
-    else:
-        cv2.line(image, ((head_center_x -center_line_offset_x), (head_center_y - center_line_offset_y)), (c_knee_x, c_knee_y), purple, 1) #Askew20250319
-        cv2.line(image, ((c_shldr_x), (c_shldr_y)), (c_knee_x, c_knee_y), center_line_color, 2) #Askew20250310
+        cv2.line(image, (c_shldr_x, c_shldr_y),(c_breast_x, c_breast_y ),  center_line_green, 3) #Askew20250318_center
+        cv2.line(image, (c_breast_x ,c_breast_y), (center_torso[0], center_torso[1]), center_line_green, 3) #Askew20250318_center
+        cv2.line(image, (center_torso[0], center_torso[1]),(c_navel_x, c_navel_y), center_line_green, 3) #Askew20250318_center
+        cv2.line(image, (c_navel_x, c_navel_y), (c_hip_x, c_hip_y), center_line_green, 3) #Askew20250318_center
+        
+        cv2.line(image, (c_hip_x , c_hip_y), (r_hip_x, r_hip_y),  center_line_green, 5) #Askew20230822
+        cv2.line(image, (r_hip_x , r_hip_y), (r_knee_x, r_knee_y),  center_line_green, 5) #Askew20230822
+        cv2.line(image, (r_knee_x , r_knee_y), (r_ankle_x, r_ankle_y),  center_line_green, 5) #dark_blue, 2)
+        if r_foot_index2center > l_foot_index2center: #c_heel_x:
+            cv2.line(image, ((head_center_x -center_line_offset_x), (head_center_y - center_line_offset_y)), (r_foot_x, r_foot_y), purple, 1) #Askew20250319
+            cv2.line(image, ((c_shldr_x), (c_shldr_y)), (r_foot_x, r_foot_y), pink_line_color, 2) #Askew20250310
+        elif l_foot_index2center > r_foot_index2center: #c_heel_x:
+            cv2.line(image, ((head_center_x -center_line_offset_x), (head_center_y - center_line_offset_y)), (l_foot_x, l_foot_y), purple, 1) #Askew20250319
+            cv2.line(image, ((c_shldr_x), (c_shldr_y)), (l_foot_x, l_foot_y), pink_line_color, 2) #Askew20250310
+        else:
+            cv2.line(image, ((head_center_x -center_line_offset_x), (head_center_y - center_line_offset_y)), (c_knee_x, c_knee_y), purple, 1) #Askew20250319
+            cv2.line(image, ((c_shldr_x), (c_shldr_y)), (c_knee_x, c_knee_y), pink_line_color, 2) #Askew20250310
 #------------------------------
 def visualize_left_side(image
 #------------------------------
@@ -590,29 +641,29 @@ def visualize_left_side(image
     , center_line_offset_x
     , center_line_offset_y
     , center_line_green
-    , center_line_color):
+    , pink_line_color):
 #------------------------------
     if DEBUG:
         print("LEFT_HIP higher --> Left Leg bears weight")
-    cv2.line(image, (c_shldr_x, c_shldr_y),(c_breast_x, c_breast_y ),  center_line_green, 3) #Askew20250318_center
-    cv2.line(image, (c_breast_x ,c_breast_y), (center_torso[0], center_torso[1]), center_line_green, 3) #Askew20250318_center
-    cv2.line(image, (center_torso[0], center_torso[1]),(c_navel_x, c_navel_y), center_line_green, 3) #Askew20250318_center
-    cv2.line(image, (c_navel_x, c_navel_y), (c_hip_x, c_hip_y), center_line_green, 3) #Askew20250318_center
-    
-    cv2.line(image, (c_hip_x , c_hip_y), (l_hip_x, l_hip_y),  center_line_green, 3) #Askew20230822
-    cv2.line(image, (l_hip_x , l_hip_y), (l_knee_x, l_knee_y),  center_line_green, 5)
-    cv2.line(image, (l_knee_x , l_knee_y), (l_ankle_x, l_ankle_y),  center_line_green, 5)
+        cv2.line(image, (c_shldr_x, c_shldr_y),(c_breast_x, c_breast_y ),  center_line_green, 3) #Askew20250318_center
+        cv2.line(image, (c_breast_x ,c_breast_y), (center_torso[0], center_torso[1]), center_line_green, 3) #Askew20250318_center
+        cv2.line(image, (center_torso[0], center_torso[1]),(c_navel_x, c_navel_y), center_line_green, 3) #Askew20250318_center
+        cv2.line(image, (c_navel_x, c_navel_y), (c_hip_x, c_hip_y), center_line_green, 3) #Askew20250318_center
+        
+        cv2.line(image, (c_hip_x , c_hip_y), (l_hip_x, l_hip_y),  center_line_green, 3) #Askew20230822
+        cv2.line(image, (l_hip_x , l_hip_y), (l_knee_x, l_knee_y),  center_line_green, 5)
+        cv2.line(image, (l_knee_x , l_knee_y), (l_ankle_x, l_ankle_y),  center_line_green, 5)
 
-    if r_foot_index2center > l_foot_index2center:
-        cv2.line(image, ((head_center_x -center_line_offset_x), (head_center_y - center_line_offset_y)), (l_foot_x, l_foot_y), purple, 1) #Askew20250319
-        cv2.line(image, ((c_shldr_x), (c_shldr_y)), (r_foot_x, r_foot_y), center_line_color, 2)
-    elif l_foot_index2center > r_foot_index2center:
-        cv2.line(image, ((head_center_x -center_line_offset_x), (head_center_y - center_line_offset_y)), (r_foot_x, r_foot_y), purple, 1) #Askew20250319
-        cv2.line(image, ((c_shldr_x), (c_shldr_y)), (l_foot_x, l_foot_y), center_line_color, 2)
-    else:
-        cv2.line(image, ((head_center_x -center_line_offset_x), (head_center_y - center_line_offset_y)), (c_knee_x, c_knee_y), purple, 1) #Askew20250319
-        cv2.line(image, ((c_shldr_x), (c_shldr_y)), (c_knee_x, c_knee_y), center_line_color, 2)
-    #cv2.line(image, (head_center_x - center_line_offset_x, head_center_y - center_line_offset_y), (l_heel_x, l_heel_y),  center_line_color, 1)
+        if r_foot_index2center > l_foot_index2center:
+            cv2.line(image, ((head_center_x -center_line_offset_x), (head_center_y - center_line_offset_y)), (l_foot_x, l_foot_y), purple, 1) #Askew20250319
+            cv2.line(image, ((c_shldr_x), (c_shldr_y)), (r_foot_x, r_foot_y), pink_line_color, 2)
+        elif l_foot_index2center > r_foot_index2center:
+            cv2.line(image, ((head_center_x -center_line_offset_x), (head_center_y - center_line_offset_y)), (r_foot_x, r_foot_y), purple, 1) #Askew20250319
+            cv2.line(image, ((c_shldr_x), (c_shldr_y)), (l_foot_x, l_foot_y), pink_line_color, 2)
+        else:
+            cv2.line(image, ((head_center_x -center_line_offset_x), (head_center_y - center_line_offset_y)), (c_knee_x, c_knee_y), purple, 1) #Askew20250319
+            cv2.line(image, ((c_shldr_x), (c_shldr_y)), (c_knee_x, c_knee_y), pink_line_color, 2)
+        #cv2.line(image, (head_center_x - center_line_offset_x, head_center_y - center_line_offset_y), (l_heel_x, l_heel_y),  pink_line_color, 1)
 ###############################
 # Classes
 #------------------------------
@@ -707,6 +758,7 @@ HIP_W_2_TORSO = .185             #Ratio of hip width to torso height, per head u
 # Colors
 #--------------------------
 blue = (255, 127, 0)
+light_tomato =(66,66,245)
 red = (50, 50, 255)
 red_orange = (120, 0, 248) #(0, 60, 175)
 red_navel = (40, 20, 255)
@@ -718,15 +770,16 @@ dark_green = (0, 77, 0)
 purple = (180, 45, 126)
 cv2_pts_olive_green = (88, 117, 66)
 cv2_lines_royal_blue = (245, 66, 66)
-cv2_landmark_lines = (245,66,230)
+cv2_landmark_lines = (0,0,0) #Askew20250618 (245,66,230)
 my_pink = (255, 99, 225)
 pink_salmon = (180, 90, 255)
 yellow=(0,255,180)
+dark_yellow=(0,255,215)
 pink = (255, 0, 255)
 my_white = (248, 255, 255)
 center_line_green = (80, 255, 80)
 contra_lines_width = 1
-center_line_color = (255, 125, 255)
+pink_line_color = (255, 125, 255)
 center_line_offset_y = int(0) #Askew20250310 (5) #100)
 center_line_offset_x = int(abs(center_line_offset_y * .01))# * .05)) #Askew20250310 .01))
 ##########################################
@@ -763,6 +816,8 @@ mp_pose = mp.solutions.pose
 img = cv2.imread(image_read);
 # Keep a copy around
 img_orig = img.copy();
+img_edges = copy.deepcopy(img.copy()); #Askew20250618_contours
+img_edged = copy.deepcopy(img.copy()); #Askew20250618_contours
 
 # Rectangle to be used with Subdiv2D
 #size = img.shape
@@ -784,7 +839,7 @@ img_orig = img.copy();
 #cap = cv2.imread(image_read) #VideoCapture(1)
 cap = img
 #with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.85) as pose:
-with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) as pose: #Askew20250309
+with mp_pose.Pose(min_detection_confidence=0.57, min_tracking_confidence=0.90) as pose: #Askew20250309
 
     # while True: #cap.isOpened():
         #ret, frame =cap.read()
@@ -806,19 +861,39 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
 
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-# - - - - - - - - - - - - -
-# Commented out for now. This section is future mod, to create grayscale for contour lines
-# - - - - - - - - - - - - -
-    # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    # gray_three = cv2.merge([gray,gray,gray])
+# - - - - - - - - - - - - -#Askew20250618_contours
+# Commented out for now. This section is future mod, to create grayscale for contour lines #Askew20250618_contours
+# - - - - - - - - - - - - - #Askew20250618_contours
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray_three = cv2.merge([gray,gray,gray])
 
-    # edges = cv2.Canny(gray_three,150,200,apertureSize = 3) #3)
-    # lines = cv2.HoughLinesP(edges,cv2.HOUGH_PROBABILISTIC, np.pi/180, 30, minLineLength,maxLineGap)
-    # for x in range(0, len(lines)):
-    #     for x1,y1,x2,y2 in lines[x]:
-    #         cv2.line(gray_three,(x1,y1),(x2,y2),(120,0,248),2, cv2.LINE_4)
-   
-    # cv2.imshow('gray_three', gray_three)
+    gray_center = copy.deepcopy(gray)
+    blur = cv2.GaussianBlur(gray_center, (3, 3),cv2.BORDER_DEFAULT) #(5, 5),cv2.BORDER_DEFAULT)
+    ret, thresh = cv2.threshold(blur, 200, 255,cv2.THRESH_BINARY_INV)
+    contours, hierarchies = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    blank = np.zeros(thresh.shape[:2], dtype='uint8')
+    my_center = cv2.drawContours(blank, contours, -1,(255, 0, 0), 1)
+    cv2.imshow("My_Center:", my_center)
+
+
+    edged = cv2.Canny(gray, 30, 200)
+    edges = cv2.Canny(gray_three,150,200,apertureSize = 3) #3)
+    lines = cv2.HoughLinesP(edges,cv2.HOUGH_PROBABILISTIC, np.pi/180, 30, minLineLength,maxLineGap)
+    for x in range(0, len(lines)):
+     for x1,y1,x2,y2 in lines[x]:
+         cv2.line(gray_three,(x1,y1),(x2,y2),(120,0,248),2, cv2.LINE_4)
+    contours, hierarchy = cv2.findContours(edged,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+    cv2.imshow('Canny Edged After Contouring', edged)
+    cv2.drawContours(img_edged, contours, -1, (0, 255, 0), 1)
+    cv2.imshow('Contours for Edged', img_edged) #Askew20250618_contours
+
+    contours, hierarchy = cv2.findContours(edges,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+    cv2.imshow('Canny Edges After Contouring', edges)
+    cv2.drawContours(img_edges, contours, -1, (0, 255, 0), 1)
+    cv2.imshow('Contours for Edges', img_edges) #Askew20250618_contours
+    
+
+    # No Value -->cv2.imshow('gray_three', gray_three) #Askew20250618_contours
 # - - - - - - - - - - - - -
 # End Future code block
 # - - - - - - - - - - - - -
@@ -952,6 +1027,7 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
                     ,(float(RIGHT_SOLAR_PLEXUS[1]) + float(RIGHT_NAVEL[1]))/2]
     CENTER_RIB_CAGE = ((LEFT_RIB_CAGE[0] + RIGHT_RIB_CAGE[0])/2, (LEFT_RIB_CAGE[1] + RIGHT_RIB_CAGE[1])/2)
 
+
     # Breast Line
     LEFT_BREAST = ((LEFT_SHOULDER[0] + LEFT_SOLAR_PLEXUS[0])/2),((LEFT_SHOULDER[1] + LEFT_SOLAR_PLEXUS[1])/2)
     RIGHT_BREAST = ((RIGHT_SHOULDER[0] + RIGHT_SOLAR_PLEXUS[0])/2),((RIGHT_SHOULDER[1] + RIGHT_SOLAR_PLEXUS[1])/2)
@@ -979,7 +1055,8 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
     c_mouth_x, c_mouth_y = int(round(CENTER_MOUTH[0] * width)), int(round(CENTER_MOUTH[1] * height))
 
     # Nose
-    nose_xy = int(round(NOSE[0] * width)), int(round(NOSE[1] * height))
+    nose_xy = int(round(NOSE[0] * width)), int(round(NOSE[1] * height)) #ASkew20250616 nose
+    
 
     # Left ear.
     l_ear_x = int(landmarks[mp_pose.PoseLandmark.LEFT_EAR].x * width)
@@ -1048,6 +1125,9 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
 
     c_solar_x, c_solar_y = ((l_solar_x + r_solar_x)/2), (l_solar_y + r_solar_y)/2
     center_solar_x, center_solar_y = int(CENTER_SOLAR_PLEXUS[0] * width), int(CENTER_SOLAR_PLEXUS[1] * height)
+    nose2solar_length = findDistance(nose_xy[0], nose_xy[1], c_solar_x, c_solar_y)/np.pi/4
+    print(f'NEW: {nose2solar_length=}')
+    #cv2.line(image, (l_rib_cage_x, l_rib_cage_y), (r_rib_cage_x, r_rib_cage_y), pink_line_color, 2) 
     
     l_rib_cage_x = int(LEFT_RIB_CAGE[0] * width)
     l_rib_cage_y = int(LEFT_RIB_CAGE[1] * height)
@@ -1056,6 +1136,8 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
     c_rib_cage_x = int(CENTER_RIB_CAGE[0] * width)
     c_rib_cage_y = int(CENTER_RIB_CAGE[1] * height)
     rib_cage_length = findDistance(l_rib_cage_x, l_rib_cage_y, r_rib_cage_x, r_rib_cage_y)/np.pi/4
+    cv2.line(image, (l_rib_cage_x, l_rib_cage_y), (r_rib_cage_x, r_rib_cage_y), pink_line_color, 2) 
+    #nose2ribcage = findDistance((c_rib_cage_x, c_rib_cage_y),(chi)
 
     l_breast_x = int(LEFT_BREAST[0] * width)
     l_breast_y = int(LEFT_BREAST[1] * height)
@@ -1213,8 +1295,9 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
     #---------------------------------
     center_line_length = findDistance(c_shldr_x, c_shldr_y, c_heel_x, c_heel_y) #Askew20250310
     center_point  = (c_hip_x, c_hip_y)
-    cv2.circle(image, (center_point[0], center_point[1]), 5, red, 8)
+    
     if DEBUG:
+        cv2.circle(image, (center_point[0], center_point[1]), 2, red, 3) #Askew20250618__center
         print("center_point:", center_point)
         print(f'center_line_length: {center_line_length}') 
 
@@ -1241,18 +1324,24 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
     # if r_foot_index2center > l_foot_index2center:# l_heel2center > r_heel2center: #Askew20250310
     if l_hip_len > r_hip_len: #Askew20250310
         SUPPORT_LEG = 'LEFT'
-        cv2.line(image, (l_foot_x, l_foot_y ), (c_hip_x, c_hip_y), center_line_color, 3) #Askew20250310
-        if DEBUG: print("left hip support leg")
+        
+        if DEBUG:
+            cv2.line(image, (l_foot_x, l_foot_y ), (c_hip_x, c_hip_y), pink_line_color, 3) #Askew20250310
+            print("left hip support leg")
     # elif  l_foot_index2center > r_foot_index2center: #r_heel2center > l_heel2center: #Askew20250310
     elif r_hip_len > l_hip_len: #Askew20250310
-        cv2.line(image, (r_foot_x, r_foot_y ), (c_hip_x, c_hip_y), center_line_color, 3) #Askew20250310
+        
         SUPPORT_LEG = 'RIGHT'
-        if DEBUG: print("right hip support leg")
+        if DEBUG:
+            cv2.line(image, (r_foot_x, r_foot_y ), (c_hip_x, c_hip_y), pink_line_color, 3) #Askew20250310
+            print("right hip support leg")
     else:
         #if DEBUG: #Askew20250310
         SUPPORT_LEG = 'EQUAL'
-        cv2.line(image, (c_foot_x, c_foot_y ), (c_hip_x, c_hip_y), center_line_color, 3) #Askew20250310
-        if DEBUG: print("heels are equal to center hip")
+        
+        if DEBUG:
+            cv2.line(image, (c_foot_x, c_foot_y ), (c_hip_x, c_hip_y), pink_line_color, 3) #Askew20250310
+            print("heels are equal to center hip")
    
     
     #---------------------------------
@@ -1425,6 +1514,17 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
     c_solar_2_c_navel = findDistance(c_solar_x, c_solar_y, c_navel_x, c_navel_y)
     c_navel_2_c_hip    = findDistance(c_navel_x, c_navel_y, c_hip_x, c_hip_y)
 
+    #
+    # Askew20250618 New - get chin to solar = solar to pelvis bottom!
+    #
+    nose2ribcage_length = findDistance(nose_xy[0], nose_xy[1], c_solar_x, c_solar_y) #Askew20250618 New - get chin to solar = solar to pelvis bottom!
+    nose2ribcage_len_new = findDistance(nose_xy[0], nose_xy[1], c_rib_cage_x, c_rib_cage_y) #Askew20250618 New 
+    print(f'NEW: {nose2ribcage_len_new=}')
+    cv2.line(image, (c_rib_cage_x, c_rib_cage_y), (c_rib_cage_x , (c_rib_cage_y + int(round(nose2ribcage_len_new/2)))),  red_orange, 3)
+    if DEBUG:print(f'{nose2ribcage_length=} using coord {c_solar_x=}, {c_solar_y=} * {nose2ribcage_length=}') #Askew20250618 New - get chin to solar = solar to pelvis bottom!
+
+
+
     if ROTATION_DIRECTION == ROTATION_NEGATIVE:  #Askew20250314_rotate
         rotate_length = (c_hip_x -c_shldr_x )   #Askew20250314_rotate
     else:                                       #Askew20250314_rotate
@@ -1459,9 +1559,9 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
         print("solar_rotation_offset_rect:", solar_rotation_offset_rect,"solar_rotation_offset", solar_rotation_offset, "SOLAR_PLEXUS_MIDPOINT", SOLAR_PLEXUS_MIDPOINT)
         print("torso_rotation_offset_rect:", torso_rotation_offset_rect,"torso_rotation_offset", torso_rotation_offset, "center_torso", center_torso)
 
-        cv2.circle(image, (int(center_torso[0]), int(center_torso[1])), 5, dark_green, 6) #Askew20250318_center
-        cv2.circle(image, (int(torso_rotation_offset_rect[0]), int(torso_rotation_offset_rect[1])), 5, dark_blue, 7) #Askew20250314
-        cv2.circle(image, (int(torso_rotation_offset[0]), int(torso_rotation_offset[1])), 10, yellow, 20) #Askew20250318_center
+        cv2.circle(image, (int(center_torso[0]), int(center_torso[1])), 5, dark_green, 3) #Askew20250616_center_cir_small
+        cv2.circle(image, (int(torso_rotation_offset_rect[0]), int(torso_rotation_offset_rect[1])), 1, dark_blue, 3) #Askew20250618_center
+        cv2.circle(image, (int(torso_rotation_offset[0]), int(torso_rotation_offset[1])), 1, yellow, 2) #Askew20250618_center
     #-------------------------
     # Continue with ROTATION determination
     #-------------------------
@@ -1479,13 +1579,24 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
     #-------------------------
     # c_face_angle = findAngle(c_ear_x, c_ear_y, SHOULDER_MIDPOINT[0], SHOULDER_MIDPOINT[1]) #Askew20250314
     c_face_angle = findAngle(nose_xy[0], nose_xy[1], c_shldr_x, c_shldr_y) #Askew20250314
-    c_face_length = findDistance(nose_xy[0], nose_xy[1], c_shldr_x, c_shldr_y) #Askew20250315_angle
+    nose2sternum_length  = findDistance(nose_xy[0], nose_xy[1], c_shldr_x, c_shldr_y) #Askew20250616_nose_sternum
+    if DEBUG:print(f'nose2sternum_length: {nose2sternum_length=}')
     if DEBUG:
-        print(fr'c_face_angle" {c_face_angle} | c_face_length: {c_face_length}') #Askew20250315_cv2
+        print(fr'c_face_angle" {c_face_angle}') #Askew20250315_cv2
         #++++++++++++++++++++++++++++++++++
-        # Perfect line to sternum top and shoulder midpoint!!!
+        # Perfect line from nose to sternum top and shoulder midpoint!!!
         #++++++++++++++++++++++++++++++++++
-        cv2.line(image, (nose_xy[0], nose_xy[1]), (c_shldr_x, c_shldr_y), purple, 8) #Askew20250315_cv2
+        cv2.line(image, (nose_xy[0], nose_xy[1]), (c_shldr_x, c_shldr_y), purple, 2) #Askew12]120250616 mKW purple line think to find.  Candidate nose2sternum
+
+    #############################################
+    ## W H Y   D O E S  THIS  PARAGRAPH NOTTTTT WORK?
+    #############################################
+
+    P2, P3 = left_extract_points(c_ear_x, c_ear_y, c_face_angle, nose2sternum_length) #Askew20250618
+    R_P2, R_P3 = right_extract_points(c_shldr_x, c_shldr_y , c_face_angle, nose2sternum_length) #Askew20250618
+    if DEBUG:cv2.line(image, (P2, P3), (R_P2, R_P3),  cv2_lines_royal_blue, 1) #Askew20250618
+
+
 
     #-------------------------
     # SHOULDERS: verify Stance and Posture
@@ -1654,11 +1765,11 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
     ###
     ## Joint points
     ###
-    mp_drawing.DrawingSpec(color=cv2_pts_olive_green, thickness=2, circle_radius=3), # 245,117,66
+    mp_drawing.DrawingSpec(color=cv2_pts_olive_green, thickness=1, circle_radius=2), # 2, 3 # 245,117,66
     ###
     ## Body Line segments
     ###
-    mp_drawing.DrawingSpec(color=cv2_landmark_lines, thickness=3, circle_radius=2) #Askew20250309 245,66,230  cv2_lines_royal_blue
+    mp_drawing.DrawingSpec(color=cv2_landmark_lines, thickness=2, circle_radius=2) #Askew20250618 3, 4 245,66,230  cv2_lines_royal_blue
     )
     ##########################################
     # Render (Visualize) Drawings 
@@ -1666,7 +1777,7 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
     #----------------------------------------#
     # Plot Center of Body
     #----------------------------------------#
-    cv2.circle(image, (center_point[0], center_point[1]), 5, red, 8) #Askew20250318_center
+    cv2.circle(image, (center_point[0], center_point[1]), 5, red, 4) #Askew20250318_center
     #----------------------------------------#
     # Load Bearing leg
     #----------------------------------------#ccccc
@@ -1678,10 +1789,10 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
     # if ((l_solar_length > r_solar_length) & (r_hip2foot_length > l_hip2foot_length) & (l_hip_angle_abs > r_hip_angle_abs)): # & (L_HIP_TO_CENTER_ANGLE_N > R_HIP_TO_CENTER_ANGLE_N) ):
     if ((l_solar_length > r_solar_length) & (r_hip2foot_length > l_hip2foot_length) & (r_hip2shldr_angle > l_hip2shldr_angle)): # & (L_HIP_TO_CENTER_ANGLE_N > R_HIP_TO_CENTER_ANGLE_N) ):
         HIP_HIGHER = "RIGHT"
-        visualize_right_side(image, head_center_x, head_center_y, c_shldr_x, c_shldr_y, c_breast_x, c_breast_y, center_torso, c_navel_x, c_navel_y, c_hip_x, c_hip_y, r_knee_x, r_knee_y , torso_width, torso_height, width, height, torso_rotation_offset_rect, center_line_offset_x, center_line_offset_y, center_line_green, center_line_color )
+        if DEBUG:visualize_right_side(image, head_center_x, head_center_y, c_shldr_x, c_shldr_y, c_breast_x, c_breast_y, center_torso, c_navel_x, c_navel_y, c_hip_x, c_hip_y, r_knee_x, r_knee_y , torso_width, torso_height, width, height, torso_rotation_offset_rect, center_line_offset_x, center_line_offset_y, center_line_green, pink_line_color )
     elif ((r_solar_length > l_solar_length) & (l_hip2foot_length > r_hip2foot_length) & (l_hip2shldr_angle > r_hip2shldr_angle)): # & (L_HIP_TO_CENTER_ANGLE_N > R_HIP_TO_CENTER_ANGLE_N)):
         HIP_HIGHER = "LEFT"
-        visualize_left_side(image, head_center_x, head_center_y, c_shldr_x, c_shldr_y, c_breast_x, c_breast_y, center_torso, c_navel_x, c_navel_y, c_hip_x, c_hip_y, l_knee_x, l_knee_y , torso_width, torso_height, width, height, torso_rotation_offset_rect, center_line_offset_x, center_line_offset_y, center_line_green, center_line_color )
+        if DEBUG:visualize_left_side(image, head_center_x, head_center_y, c_shldr_x, c_shldr_y, c_breast_x, c_breast_y, center_torso, c_navel_x, c_navel_y, c_hip_x, c_hip_y, l_knee_x, l_knee_y , torso_width, torso_height, width, height, torso_rotation_offset_rect, center_line_offset_x, center_line_offset_y, center_line_green, pink_line_color )
     else: 
         HIP_HIGHER = "EQUAL"
         if DEBUG:
@@ -1693,9 +1804,9 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
             print("l_hip2shldr_angle", l_hip2shldr_angle, "r_hip2shldr_angle", r_hip2shldr_angle)
         # if l_knee_angle > r_knee_angle:
         if r_hip2shldr_angle > l_hip2shldr_angle:
-            visualize_right_side(image, head_center_x, head_center_y, c_shldr_x, c_shldr_y, c_breast_x, c_breast_y, center_torso, c_navel_x, c_navel_y, c_hip_x, c_hip_y, r_knee_x, r_knee_y , torso_width, torso_height, width, height, torso_rotation_offset_rect, center_line_offset_x, center_line_offset_y, center_line_green, center_line_color )
+            if DEBUG:visualize_right_side(image, head_center_x, head_center_y, c_shldr_x, c_shldr_y, c_breast_x, c_breast_y, center_torso, c_navel_x, c_navel_y, c_hip_x, c_hip_y, r_knee_x, r_knee_y , torso_width, torso_height, width, height, torso_rotation_offset_rect, center_line_offset_x, center_line_offset_y, center_line_green, pink_line_color )
         elif l_hip2shldr_angle > r_hip2shldr_angle:
-            visualize_left_side(image, head_center_x, head_center_y, c_shldr_x, c_shldr_y, c_breast_x, c_breast_y, center_torso, c_navel_x, c_navel_y, c_hip_x, c_hip_y, l_knee_x, l_knee_y , torso_width, torso_height, width, height, torso_rotation_offset_rect, center_line_offset_x, center_line_offset_y, center_line_green, center_line_color )
+            if DEBUG: visualize_left_side(image, head_center_x, head_center_y, c_shldr_x, c_shldr_y, c_breast_x, c_breast_y, center_torso, c_navel_x, c_navel_y, c_hip_x, c_hip_y, l_knee_x, l_knee_y , torso_width, torso_height, width, height, torso_rotation_offset_rect, center_line_offset_x, center_line_offset_y, center_line_green, pink_line_color )
         else:
             if DEBUG:
                 print("HEELS EVEN")
@@ -1703,13 +1814,13 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
                 print("HEELS EVEN IF tests r_foot_index2center > l_foot_index2center", (r_foot_index2center > l_foot_index2center))
                 print("HEELS EVEN IF tests l_foot_index2center > r_foot_index2center", (l_foot_index2center > r_foot_index2center))
             if r_foot_index2center > l_foot_index2center: #c_heel_x:
-               visualize_right_side(image, head_center_x, head_center_y, c_shldr_x, c_shldr_y, c_breast_x, c_breast_y, center_torso, c_navel_x, c_navel_y, c_hip_x, c_hip_y, r_knee_x, r_knee_y , torso_width, torso_height, width, height, torso_rotation_offset_rect, center_line_offset_x, center_line_offset_y, center_line_green, center_line_color )
-               cv2.line(image, ((head_center_x -center_line_offset_x), (head_center_y - center_line_offset_y)), (r_foot_x, r_foot_y), center_line_color, 3) #Askew20250310
+               visualize_right_side(image, head_center_x, head_center_y, c_shldr_x, c_shldr_y, c_breast_x, c_breast_y, center_torso, c_navel_x, c_navel_y, c_hip_x, c_hip_y, r_knee_x, r_knee_y , torso_width, torso_height, width, height, torso_rotation_offset_rect, center_line_offset_x, center_line_offset_y, center_line_green, pink_line_color )
+               if DEBUG:cv2.line(image, ((head_center_x -center_line_offset_x), (head_center_y - center_line_offset_y)), (r_foot_x, r_foot_y), pink_line_color, 3) #Askew20250310
             elif l_foot_index2center > r_foot_index2center: #c_heel_x
-                visualize_left_side(image, head_center_x, head_center_y, c_shldr_x, c_shldr_y, c_breast_x, c_breast_y, center_torso, c_navel_x, c_navel_y, c_hip_x, c_hip_y, r_knee_x, r_knee_y , torso_width, torso_height, width, height, torso_rotation_offset_rect, center_line_offset_x, center_line_offset_y, center_line_green, center_line_color )
-                cv2.line(image, ((head_center_x -center_line_offset_x), (head_center_y - center_line_offset_y)), (l_foot_x, l_foot_y), center_line_color, 3) #Askew20250310
+                visualize_left_side(image, head_center_x, head_center_y, c_shldr_x, c_shldr_y, c_breast_x, c_breast_y, center_torso, c_navel_x, c_navel_y, c_hip_x, c_hip_y, r_knee_x, r_knee_y , torso_width, torso_height, width, height, torso_rotation_offset_rect, center_line_offset_x, center_line_offset_y, center_line_green, pink_line_color )
+                if DEBUG:cv2.line(image, ((head_center_x -center_line_offset_x), (head_center_y - center_line_offset_y)), (l_foot_x, l_foot_y), pink_line_color, 3) #Askew20250310
             else:
-                cv2.line(image, ((head_center_x -center_line_offset_x), (head_center_y - center_line_offset_y)), (c_knee_x, c_knee_y), center_line_color, 3)
+                if DEBUG:cv2.line(image, ((head_center_x -center_line_offset_x), (head_center_y - center_line_offset_y)), (c_knee_x, c_knee_y), pink_line_color, 3)
             
     #----------------------------
     # Continue Plotting
@@ -1740,23 +1851,30 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
     #============================
     # Mouth Center and Extend
     #============================
-    cv2.circle(image, tuple(np.multiply(CENTER_EAR, [width, height]).astype(int)), 2, orange, 2) #Askew20230812
+    if DEBUG:cv2.circle(image, tuple(np.multiply(CENTER_EAR, [width, height]).astype(int)), 1, orange, 1) #Askew20250618 was 2, orange, 2
     #-------------------------------
     # Extend Breast Line
     #-------------------------------
     #BREAST_MIDPOINT
-    cv2.circle(image, (c_breast_x, c_breast_y), 2, red_orange, 4) #Askew20250310
+    #if DEBUG:
+    cv2.drawMarker(image, (c_breast_x, c_breast_y), red_orange, 0, contra_lines_width *3,  cv2.LINE_4) #Askew20250618 change dot to "3", plus add DEBUG
+        # 0 = crosshairs
+        # 2 = linewidth
+        # cv2.LINE_AA = line_type
+
     # Breast line
     P2, P3 = left_extract_points(l_breast_x, l_breast_y, l_breast_angle, breast_length)
     R_P2, R_P3 = right_extract_points(r_breast_x, r_breast_y, r_breast_angle, breast_length)
-    cv2.line(image, (P2 , P3), (R_P2, R_P3),  red_orange, contra_lines_width) #dark_blue, 2)
+    # cv2.arrowedLine(image, (P2 , P3), (R_P2, R_P3),  red_orange, contra_lines_width) #dark_blue, 2)
+    cv2.arrowedLine(image, (l_breast_x , l_breast_y), (r_breast_x, r_breast_y),  red_orange, contra_lines_width) #dark_blue, 2)
 
     #-------------------------------
     # Extend Navel Line
     #-------------------------------
     #navel_midpoint
-    cv2.circle(image, (c_navel_x, c_navel_y), 2, red_orange, 2) #Askew20230812
+    
     if DEBUG:
+        cv2.circle(image, (c_navel_x, c_navel_y), 5, red_orange, 2) #Askew20250618
         cv2.putText(image, f'(c_navel_x, c_navel_y', ((3 * puttext_offset) + c_navel_x, ((3 * puttext_offset) +  12) + c_navel_y), cv2.FONT_HERSHEY_SIMPLEX, 0.25, red_orange, 1, cv2.LINE_4) #Askew20230812
         cv2.putText(image, f'({c_navel_x, c_navel_y})',(puttext_offset + c_navel_x, puttext_offset + c_navel_y), cv2.FONT_HERSHEY_SIMPLEX, 0.25, red_orange, 1, cv2.LINE_4)
     
@@ -1778,8 +1896,14 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
     #-------------------------------
     P2, P3 = left_extract_points(l_rib_cage_x, l_rib_cage_y, l_angle_rib_cage, rib_cage_length/2)
     R_P2, R_P3 = right_extract_points(r_rib_cage_x, r_rib_cage_y, r_angle_rib_cage, rib_cage_length/2)
-    
     cv2.line(image, (P2 , P3), (R_P2, R_P3), dark_blue, 5) #contra_lines_width) #red_orange, contra_lines_width) #dark_blue, 2)
+
+    #-------------------------------
+    # Extend Pelvis
+    #-------------------------------
+    P2, P3 = left_extract_points(l_rib_cage_x, l_rib_cage_y, 0, rib_cage_length)
+    R_P2, R_P3 = right_extract_points(r_rib_cage_x, r_rib_cage_y, 0, rib_cage_length)
+    cv2.line(image, (P2 , P3), (R_P2, R_P3), red, 5) #contra_lines_width) #red_orange, contra_lines_width) #dark_blue, 2)
     
     #-------------------------------
     #Box in Ribs from Shoulder to Rib Cage
@@ -1788,7 +1912,7 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
     cv2.line(image, (r_shldr_x, r_shldr_y), (r_rib_cage_x, r_rib_cage_y), dark_blue, 5)
    
     #-------------------------------
-    # Extend nose2shoulder
+    # Extend nose2mouth
     #-------------------------------
     length =nose2mouth_length
     P1 = ()
@@ -1800,64 +1924,71 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
     R_P1 = (c_shldr_x, c_shldr_y) #(c_mouth_x, c_mouth_y ) #+ (length *2000))
     R_P2 = (int(round(R_P1[0] + (length) *  np.cos(angle_ears2mouth_shlders * np.pi / 180.0))))
     R_P3 = (int(round(R_P1[1] +  (length) * np.sin(angle_ears2mouth_shlders * np.pi / 180.0))))
-    cv2.line(image, (P2 , P3), (R_P2, R_P3), orange, 5)
+    # cv2.line(image, (P2 , P3), (R_P2, R_P3), orange, 1)
+    cv2.line(image, P1, R_P1, orange, 1)
     #--------------------------------
     # Nose to Mouth
     #--------------------------------
+    length = 0
     nose2mouth_length_distance  = findDistance(nose_xy[0], nose_xy[1], CENTER_MOUTH[0], CENTER_MOUTH[1]) 
     if DEBUG: print("nose2mouth_length", nose2mouth_length, "nose2mouth_length_distance", nose2mouth_length_distance, "angle_ears2mouth_shlders", angle_ears2mouth_shlders, "angle_calc_nose2shldr_mid", angle_calc_nose2shldr_mid)
     cv2.line(image, (nose_xy[0], nose_xy[1]), (c_mouth_x, c_mouth_y), red_orange, 2)
    
-    #============================zzzzzw
-    # mouth to shoulder LINE
-    #============================
-    head_top = point_pos_rect(((nose_xy[0]- (((2*np.pi/2) *  shldr_angle_offset_rect[0]) + ((2 * np.pi/4) *head_width))), (nose_xy[1] - head_length)), (nose2mouth_length_distance/width*torso_width) ,shldr_bend)
-    if DEBUG: print("head_top", head_top)
-    cv2.circle(image, [int(head_top[0]), int(head_top[1])] ,2, red, 5)
     # - - - - - - - - - - - - - - -
     # - - - - - - - - - - - - - - -
     # NOSE 2 SHLDR Line (sternum top)
     # - - - - - - - - - - - - - - -
     # - - - - - - - - - - - - - - -
+    length = 0
+    # nose2sternum_length  = findDistance(nose_xy[0], nose_xy[1], c_shldr_x, c_shldr_y) #Askew20250616_nose_sternum
+    # if DEBUG:print(f'nose2sternum_length: {nose2sternum_length=}')
+    # # P2, P3 = left_extract_points(nose_xy[0], nose_xy[1], c_face_angle, nose2sternum_length) #Askew20250315_sternum : switched c_face_angle_sign to positive
+    # # R_P2, R_P3 = right_extract_points(c_shldr_x, c_shldr_y, c_face_angle, nose2sternum_length) #Askew20250318_sternum : switched c_face_angle_sign to negative
 
-    nose2sternum_length  = findDistance(nose_xy[0], nose_xy[1], c_shldr_x, c_shldr_y) 
-    length = nose2sternum_length 
-    P2, P3 = left_extract_points(nose_xy[0], nose_xy[1], c_face_angle, length) #Askew20250315_sternum : switched c_face_angle_sign to positive
-    R_P2, R_P3 = right_extract_points(c_shldr_x, c_shldr_y, c_face_angle, length) #Askew20250318_sternum : switched c_face_angle_sign to negative
-    cv2.line(image, (P2, P3), (R_P2, R_P3),  cv2_pts_olive_green, 5) #Askew20250313_sternum
+    # # P2, P3 = left_extract_points(nose_xy[0], nose_xy[1], c_face_angle, nose2sternum_length) #Askew20250616_sternum : switched c_face_angle_sign to positive
+    # # R_P2, R_P3 = right_extract_points(c_shldr_x, c_shldr_y, c_face_angle, nose2sternum_length) #Askew20250318_sternum : switched c_face_angle_sign to negative
 
-    P2, P3 = left_extract_points(c_ear_x, c_ear_y, c_face_angle, length)
-    # R_P2, R_P3 = right_extract_points((c_shldr_x - int(round(torso_rotation_offset_rect[0]/width))), (c_shldr_y - - int(round(torso_rotation_offset_rect[1]/height))), -c_face_angle, length) #Askew20230826
-    R_P2, R_P3 = right_extract_points(c_shldr_x, c_shldr_y , c_face_angle, length) #Askew20250312
-    cv2.line(image, (P2, P3), (R_P2, R_P3),  cv2_lines_royal_blue, 5) #Askew20250318
+    # P2, P3 = nose_xy[0], nose_xy[1] #Askew20250616_sternum : switched c_face_angle_sign to positive
+    # R_P2, R_P3 = c_shldr_x, c_shldr_y #Askew20250318_sternum : switched c_face_angle_sign to negative
+
+
+    # cv2.line(image, (P2, P3), (R_P2, R_P3),  cv2_pts_olive_green, 20) #Askew20250616_sternum size was 5
     # - - - - - - - - - - - - - - -
-     # - - - - - - - - - - - - - - -
     #============================
     # Extend Hips
     #============================
     P2, P3 = left_extract_points(l_hip_x, l_hip_y, l_hip_angle, shldr_length)
     R_P2, R_P3 = right_extract_points(r_hip_x, r_hip_y, r_hip_angle, shldr_length)
     cv2.line(image, (l_hip_x  , l_hip_y), (P2, P3), red_orange, 2) 
-    cv2.line(image, (r_hip_x  , r_hip_y), (R_P2, R_P3),  red_orange, 3)
+    cv2.line(image, (r_hip_x  , r_hip_y), (R_P2, R_P3),  red_orange, 2)
     cv2.line(image, (P2 , P3), (R_P2, R_P3),  red_orange, contra_lines_width)
 
+
+    length = 0 
     #============================
     # Extend Solar Plexus
     #============================
+    #---------------------------
+    # Solar_plexus line (at ribcage bottom) #Askew20250618 extend pelvis past pubic #Askew202506018
+    #----------------------------
     solar_plexus_length = width/findDistance(l_solar_x, l_solar_y, r_solar_x, r_solar_y) #Askew20250319
+
     P2, P3 = left_extract_points(l_solar_x, l_solar_y, l_solar_plexus_angle, solar_plexus_length)
     R_P2, R_P3 = right_extract_points(r_solar_x, r_solar_y, r_solar_plexus_angle, solar_plexus_length)
-    #---------------------------
-    # Suppress solar_plexus line
-    #----------------------------
-    cv2.line(image, (P2 , P3), (R_P2, R_P3),  purple, 3) #Askew20250319_solar
+    cv2.line(image, (P2 , P3), (R_P2, R_P3),  purple, 2) #Askew20250319_solar
+    print(f'Bottom code, Extend Solar Plexus: {solar_plexus_length=}, {P2=}, {P3=}, {R_P2=}, {R_P3=}')
+
+
     cv2.putText(image, str(f'Solar Plexus:({P2}:{P3})'), #Askew20250319_solar
         (int(P2 - puttext_offset), int(P3 - puttext_offset)), #Askew20250319_solar
         cv2.FONT_HERSHEY_SIMPLEX, 0.25, my_white, 1, cv2.LINE_4) #Askew20250319_solar
     cv2.putText(image, str(f'Solar Plexus:({R_P2}:{R_P3})'), #Askew20250319_solar
         (int(R_P2 + 3 * puttext_offset), int(R_P3 - puttext_offset)), #Askew20250319_solar
         cv2.FONT_HERSHEY_SIMPLEX, 0.25, my_white, 1, cv2.LINE_4) #Askew20250319_solar
-     #============================
+
+    length = 0
+
+    #============================
     # Extend Shoulders
     #============================
     P2, P3 = left_extract_points(l_shldr_x, l_shldr_y, l_shldr_angle, shldr_length)
@@ -1866,18 +1997,28 @@ with mp_pose.Pose(min_detection_confidence=0.58, min_tracking_confidence=0.90) a
     #=============================
     # Extend Center of Eyes       #Askew20230812
     #=============================
+    ###############################
+    # Not working, needs review and changes
+    ###############################
+    # 1)
+    # head_top = point_pos_rect(((nose_xy[0]- (((2*np.pi/2) *  shldr_angle_offset_rect[0]) + ((2 * np.pi/4) *head_width))), (nose_xy[1] - head_length)), (nose2mouth_length_distance/width*torso_width) ,shldr_bend)
+    # cv2.circle(image, [int(head_top[0]), int(head_top[1])] ,2, light_tomato, 15)
+    # 2)
+   
+    # - - - - - - - - - - - - - - -
 
     #============================
     # Split body down middle
     #============================
-    cv2.line(image, (r_shldr_x, r_shldr_y), (tuple(np.multiply(HIP_MIDPOINT, [image.shape[1], image.shape[0]]).astype(int))), (purple), 2) #Askew20250315_cv2
+    # DEBUG just in case: print(f'TROUBLED CODE: {r_shldr_x=}, {r_shldr_y=}:  (tuple(np.multiply(HIP_MIDPOINT, [image.shape[1], image.shape[0]]).astype(int)))): {(tuple(np.multiply(HIP_MIDPOINT, [image.shape[1], image.shape[0]]).astype(int)))}')
+    cv2.line(image, (r_shldr_x, r_shldr_y), (tuple(np.multiply(HIP_MIDPOINT, [image.shape[1], image.shape[0]]).astype(int))), dark_yellow, 1) #Askew20250315_cv2
     cv2.putText(image, f'(r_shldr_x, r_shldr_y', ((2 *puttext_offset) + r_shldr_x, ((2 * puttext_offset) + 8) + r_shldr_y), cv2.FONT_HERSHEY_SIMPLEX, 0.25, dark_blue, 1, cv2.LINE_4)
     cv2.putText(image, f'({r_shldr_x, r_shldr_y})', ( puttext_offset + r_shldr_x,  puttext_offset + r_shldr_y), cv2.FONT_HERSHEY_SIMPLEX, 0.25, dark_blue, 1, cv2.LINE_4)
-    cv2.line(image, (l_shldr_x, l_shldr_y), (tuple(np.multiply(HIP_MIDPOINT, [image.shape[1], image.shape[0]]).astype(int))), (purple), 1)
+    cv2.line(image, (l_shldr_x, l_shldr_y), (tuple(np.multiply(HIP_MIDPOINT, [image.shape[1], image.shape[0]]).astype(int))), dark_yellow, 1)
     cv2.putText(image, f'(l_shldr_x, l_shldr_y {l_shldr_x, l_shldr_y})', ( puttext_offset + l_shldr_x,  puttext_offset + l_shldr_y), cv2.FONT_HERSHEY_SIMPLEX, 0.25, dark_blue, 1, cv2.LINE_4)
 
-    cv2.polylines(image, [right_poly_top_pts], True, yellow)
-    cv2.polylines(image, [left_poly_top_pts], True, yellow)
+    cv2.polylines(image, [right_poly_top_pts], True, dark_yellow)
+    cv2.polylines(image, [left_poly_top_pts], True, dark_yellow)
     
     # - - - - - - - - - - - - - -
     # - - - - - - - - - - - - - -
@@ -1896,3 +2037,5 @@ sys.stdout.flush()
 cv2.destroyAllWindows()
 image = Image.open(fr'C:\Users\User\Desktop\python\mandelbrot\Nudes_sketch_reference\image_scanned.jpg')
 image.show(image)
+
+
