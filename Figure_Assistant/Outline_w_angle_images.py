@@ -2,6 +2,15 @@
 #####################################
 # HINTS and Notes
 #####################################
+# 0) To enable you to find your local files to process, please change the variable named "initialdir" to point to the directory path to your laptop's images path.
+#        Start by looking for this function:
+#        #--------------------------------------
+#        def bring_in_image() -> str:
+#        #--------------------------------------
+#        
+#        and change the variable "initialdir" to point to your laptop's image file path.
+#
+#   
 # 1) Polar coordinates: where THETA is the angle and r=Distance from Polar Axis (usually (0,0)) to "p" or point ending the line segment"
 #   a) Rotations
 #       i) If THETA (angle) POSITIVE=COUNTERCLOCKWISE rotation
@@ -55,18 +64,17 @@
 #    *  # Extend Navel Line, Box in Pelvis - calc lenght as findDistance of l_navel_x, l_navel_y, r_navel_x, r_navel_y
 #    * This works! length = width/findDistance(l_navel_x, l_navel_y, r_navel_x, r_navel_y) 
 #    ** Add check, if navel point > solar_plexus point, calc distance using solar_plexus point, not navel point.
-# 6.
+# 6. determine_load_bearing_leg_by_looking_for_hip_side_that_compresses
+#    a. Compare left_hip to right_hip and take the highest 1
+#    b. Draw from the load bearing hip to the load bearing knee with extra wide line
+# 7. Using the lower solar plexus, determine the navel line and make red-orange line thru navel
+# 8. Connect center lines from shoulder to breast, breast to ribcage, ribcage to navel and navel to center hips
 #####################################
 ## DONE
 #####################################
-# 1. determine_load_bearing_leg_by_looking_for_hip_side_that_compresses
-#    a. Compare left_hip to right_hip and take the highest 1
-#    b. Draw from the load bearing hip to the load bearing knee with extra wide line
-# 2. Using the lower solar plexus, determine the navel line and make red-orange line thru navel
-# 3. Connect center lines from shoulder to breast, breast to ribcage, ribcage to navel and navel to center hips
 '''
 
-import os,sys
+import os
 
 import platform
 
