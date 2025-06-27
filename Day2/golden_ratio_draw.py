@@ -98,7 +98,8 @@ width = 1050
 
 # Taking Input for the number of
 # Iterations our Algorithm will run
-n = int(input('Enter the number of iterations (must be > 1): '))
+#n = int(input('Enter the number of iterations (must be > 1): '))
+n=5
 
 # Plotting the Fibonacci Spiral Fractal
 # and printing the corresponding Fibonacci Number
