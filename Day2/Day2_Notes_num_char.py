@@ -8,9 +8,9 @@ In Python, the fundamental difference between numbers and characters lies in the
 Numbers:
 -------------------
 Python has distinct numeric data types to represent different kinds of numbers:
-Integers (int): Whole numbers (e.g., 5, -10, 0).
-Floating-point numbers (float): Numbers with decimal points (e.g., 3.14, -0.5, 2.0).
-Complex numbers (complex): Numbers with a real and an imaginary part (e.g., 2 + 3j).
+  * Integers (int): Whole numbers (e.g., 5, -10, 0).
+  * Floating-point numbers (float): Numbers with decimal points (e.g., 3.14, -0.5, 2.0).
+  *Complex numbers (complex): Numbers with a real and an imaginary part (e.g., 2 + 3j).
 ------------------
 Characters:
 ------------------
@@ -27,6 +27,9 @@ Python
 num1 = 10
 num2 = 3
 result = num1 / num2  # result will be 3.333... (float)
+print(f'{num1=} is data type: {type(num1)}\n')
+print(f'{num2=} is data type: {type(num2)}\n')
+print(f'{num1=} is divided by {num2=} and the result is: {result=}\nresults data type is {type(result)}. \n\n')
 '''
 -------------------
 Characters (Strings):
@@ -37,20 +40,22 @@ Python
 char1 = 'A'
 char2 = 'B'
 combined = char1 + char2  # combined will be 'AB'
+print(f'{char1=} is added to {char2=} and totals as {combined=}\n\n')
+print(f'    >>>> Notice when we add character data types with the plus sign, simply joins (concatonates) B to A as the result AB\n\n')
 '''
 While a string might contain a numeric character (e.g., '5'), it cannot be directly used in mathematical operations without type conversion.
 ===================
 3. Type Conversion:
 ===================
 Python provides built-in functions to convert between numeric types and strings:
-int(): Converts a string or float to an integer.
-float(): Converts a string or integer to a float.
-str(): Converts a number to its string representation.
-Python
+  * int(): Converts a string or float to an integer.
+  * float(): Converts a string or integer to a float.
+   *str(): Converts a number to its string representation.
 '''
 string_num = '123'
+print(f'{string_num=}\nstring_nums data type is {type(string_num)}\n')
 integer_num = int(string_num)  # integer_num is 123
 print(f'{integer_num=} is datatype: {type(integer_num)=}')
 '''
-In summary, numbers in Python are distinct data types designed for mathematical computations, while characters are handled as strings, even when they represent single symbols, and require explicit type conversion for numeric operations.
+In summary, numbers in Python are distinct data types designed for mathematical computations. At the same time, characters are handled as strings, even when they represent single symbols, and require explicit type conversion for numeric operations.
 '''
