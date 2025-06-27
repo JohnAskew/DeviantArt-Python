@@ -108,6 +108,7 @@ if n > 0:
     x.speed(0)
     screen = turtle.Screen()
     screen.setup(height, width)
+    screen.title("Golden Ratio as a Fibonacci Spiral.")
     fiboPlot(n)
     canvas = screen.getcanvas()
     turtle.getscreen().getcanvas().postscript(file=r"golden_ratio.eps")
