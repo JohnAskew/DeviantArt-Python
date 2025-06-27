@@ -93,8 +93,8 @@ def fiboPlot(n):
 # factor which expands or shrinks the scale
 # of the plot by a certain factor.
 factor = 5
-height = 1300
-width = 1050
+height = 640 #1300
+width = 480 #1050
 
 # Taking Input for the number of
 # Iterations our Algorithm will run
