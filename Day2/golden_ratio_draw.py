@@ -1,13 +1,16 @@
-#!/usr/bin/env python
+#!/usr/bin/env python #Mac users may need to change "python" to "python3".
 import os, sys
 '''
 Python program for Plotting Fibonacci
  spiral fractal using Turtle
---> Interactive program, so run in Terminal window with Keyboard access!
+--> To make this an interactive program: comment out the variable "n" 
+and uncomment "#n = int(input('Enter the number of iterations (must be > 1): '))".
+Now, run in Terminal window and choose the number of fibonacci iterations.
+* Your terminal code to start this program in the terminal window is either:
+    a) python golden_ratio_draw.py
+    b) python3 golden_ratio_draw.py
 
 For 8.5x11 size figure, answer "iteration" question with 7.
-
-
 '''
 try:
     import turtle
@@ -26,7 +29,7 @@ except:
 def fiboPlot(n):
 #-----------------------------------
     a = 0
-    b = 10 #Askew20250606 
+    b = 10
     square_a = a
     square_b = b
 
@@ -93,14 +96,13 @@ def fiboPlot(n):
 # factor which expands or shrinks the scale
 # of the plot by a certain factor.
 factor = 5
-height = 640 #1300
-width = 480 #1050
+height = 1300
+width = 1050
 
 # Taking Input for the number of
 # Iterations our Algorithm will run
 #n = int(input('Enter the number of iterations (must be > 1): '))
-n=5
-
+n = 5
 # Plotting the Fibonacci Spiral Fractal
 # and printing the corresponding Fibonacci Number
 if n > 0:
@@ -109,10 +111,12 @@ if n > 0:
     x.speed(0)
     screen = turtle.Screen()
     screen.setup(height, width)
-    screen.title("Golden Ratio as a Fibonacci Spiral.")
+    screen.title("Golden Ratio as a Fibonacci Spiral visual.")
     fiboPlot(n)
     canvas = screen.getcanvas()
     turtle.getscreen().getcanvas().postscript(file=r"golden_ratio.eps")
     turtle.done()
 else:
     print("Number of iterations must be > 0")
+
+  
