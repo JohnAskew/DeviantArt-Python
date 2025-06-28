@@ -474,7 +474,8 @@ def title():
     tt.up()
     tt.goto(-420,385)
     tt.color('#EC008C')
-    tt.write('Flowers for Elizabeth', align='center', font=('TIMES', 10, 'bold','underline'))
+    #tt.write('Flowers for Elizabeth', align='center', font=('TIMES', 10, 'bold','underline'))
+    tt.write('Math creating flowers demonstration', align='center', font=('TIMES', 10, 'bold','underline'))
     tt.down()
 #======================================
 # Write Title first
