@@ -57,6 +57,8 @@ def paddlebdown():
 ##########################
 ball_speed = 4
 game_speed = 0
+left_player_pad_color = "darkgreen"
+right_player_pad_color = "darkred"
 
 # Create screen
 sc = turtle.Screen()
@@ -68,7 +70,7 @@ sc.setup(width=1000, height=600)
 left_pad = turtle.Turtle()
 left_pad.speed(game_speed)
 left_pad.shape("square")
-left_pad.color("black")
+left_pad.color(left_player_pad_color)
 left_pad.shapesize(stretch_wid=6, stretch_len=2)
 left_pad.penup()
 left_pad.goto(-400, 0)
@@ -77,7 +79,7 @@ left_pad.goto(-400, 0)
 right_pad = turtle.Turtle()
 right_pad.speed(game_speed)
 right_pad.shape("square")
-right_pad.color("black")
+right_pad.color(right_player_pad_color)
 right_pad.shapesize(stretch_wid=6, stretch_len=2)
 right_pad.penup()
 right_pad.goto(400, 0)
