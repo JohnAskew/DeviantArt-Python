@@ -1,5 +1,9 @@
 import os, sys
 
+'''
+name: pong_turtle.py
+purpose: demonstrate basic gaming using turtle package.
+'''
 try:
     import turtle
 except:
@@ -11,17 +15,58 @@ try:
 except:
     os.system('pip install time')
     import time
+##########################
+# Functions
+##########################
+# Functions to move paddles
+
+
+def paddleaup():
+    y = left_pad.ycor()
+    if y < 250:  # Limit paddle movement
+        y += 20
+        left_pad.sety(y)
+
+#---------------------------#
+def paddleadown():
+#---------------------------#
+
+    y = left_pad.ycor()
+    if y > -240:  # Limit paddle movement
+        y -= 20
+        left_pad.sety(y)
+
+#---------------------------#
+def paddlebup():
+#---------------------------#
+    y = right_pad.ycor()
+    if y < 250:  # Limit paddle movement
+        y += 20
+        right_pad.sety(y)
+
+#---------------------------#
+def paddlebdown():
+#---------------------------#
+    y = right_pad.ycor()
+    if y > -240:  # Limit paddle movement
+        y -= 20
+        right_pad.sety(y)
+
+##########################
+# Variables and Setup
+##########################
+ball_speed = 4
+game_speed = 0
 
 # Create screen
 sc = turtle.Screen()
-#sc.title("Pong game")
 sc.title("Pong game:            Left Player buttons: (w), (s)                                                                                                 Right Player buttons: (arrow up), (arrow down)")
 sc.bgcolor("white")
 sc.setup(width=1000, height=600)
 
 # Left paddle
 left_pad = turtle.Turtle()
-left_pad.speed(0)
+left_pad.speed(game_speed)
 left_pad.shape("square")
 left_pad.color("black")
 left_pad.shapesize(stretch_wid=6, stretch_len=2)
@@ -30,7 +75,7 @@ left_pad.goto(-400, 0)
 
 # Right paddle
 right_pad = turtle.Turtle()
-right_pad.speed(0)
+right_pad.speed(game_speed)
 right_pad.shape("square")
 right_pad.color("black")
 right_pad.shapesize(stretch_wid=6, stretch_len=2)
@@ -39,7 +84,7 @@ right_pad.goto(400, 0)
 
 # Ball of circle shape
 hit_ball = turtle.Turtle()
-hit_ball.speed(4)  # Adjusted speed
+hit_ball.speed(ball_speed)  # Adjusted speed
 hit_ball.shape("circle")
 hit_ball.color("blue")
 hit_ball.penup()
@@ -53,44 +98,13 @@ right_player = 0
 
 # Displays the score
 sketch = turtle.Turtle()
-sketch.speed(0)
+sketch.speed(game_speed)
 sketch.color("blue")
 sketch.penup()
 sketch.hideturtle()
 sketch.goto(0, 260)
 sketch.write("Left_player : 0    Right_player: 0",
              align="center", font=("Courier", 24, "normal"))
-
-# Functions to move paddles
-
-
-def paddleaup():
-    y = left_pad.ycor()
-    if y < 250:  # Limit paddle movement
-        y += 20
-        left_pad.sety(y)
-
-
-def paddleadown():
-    y = left_pad.ycor()
-    if y > -240:  # Limit paddle movement
-        y -= 20
-        left_pad.sety(y)
-
-
-def paddlebup():
-    y = right_pad.ycor()
-    if y < 250:  # Limit paddle movement
-        y += 20
-        right_pad.sety(y)
-
-
-def paddlebdown():
-    y = right_pad.ycor()
-    if y > -240:  # Limit paddle movement
-        y -= 20
-        right_pad.sety(y)
-
 
 # Keyboard bindings
 sc.listen()
@@ -99,7 +113,10 @@ sc.onkeypress(paddleadown, "s")  # Changed to 's'
 sc.onkeypress(paddlebup, "Up")
 sc.onkeypress(paddlebdown, "Down")
 
-# Main game loop
+##########################
+#  Main game loop
+##########################
+
 while True:
     sc.update()
     time.sleep(0.01)  # Add delay to make game smoother
