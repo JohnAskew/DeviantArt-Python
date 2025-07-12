@@ -14,7 +14,8 @@ except:
 
 # Create screen
 sc = turtle.Screen()
-sc.title("Pong game")
+#sc.title("Pong game")
+sc.title("Pong game:            Left Player buttons: (w), (s)                                                                                                 Right Player buttons: (arrow up), (arrow down)")
 sc.bgcolor("white")
 sc.setup(width=1000, height=600)
 
